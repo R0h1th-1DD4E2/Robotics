@@ -1,10 +1,21 @@
 import cv2
 import mediapipe as mp
 import math
+import socket
 
-threshold = 40
+
+def bot_command(move: str, pwm: int) -> None:
+    msg4robot = ','.join([move,f'{pwm},{pwm},0,0'])
+    print(msg4robot)
+    bytesToSend         = str.encode(msg4robot)
+    bufferSize          = 1024
+    UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+    UDPClientSocket.sendto(bytesToSend, robotAddressPort)
+
 
 robotAddressPort = ("192.168.41.243", 8080)
+threshold = 250
+pwm = 100
 # Initialize MediaPipe Hands
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands()
@@ -18,23 +29,6 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)  # Set height
 cv2.namedWindow('Hand Tracking', cv2.WINDOW_NORMAL)  # Create a resizable window
 cv2.resizeWindow('Hand Tracking', 1280, 720)  # Set the window size to 1280x720
 
-# Get the height and width of the frame
-#height, width, _ = frame.shape
-
-height = 720
-width = 1280
-    
-# Calculate the coordinates of the center of the screen
-center_x = width // 2
-center_y = height // 2
-    
-# Calculate the coordinates of the top left and bottom right corners of the top box
-top_box_top_left = (center_x - 100, 0)
-top_box_bottom_right = (center_x + 100, 200)
-    
-# Calculate the coordinates of the top left and bottom right corners of the bottom box
-bottom_box_top_left = (center_x - 100, height - 200)
-bottom_box_bottom_right = (center_x + 100, height)
 
 while cap.isOpened():
     global turn
@@ -74,77 +68,75 @@ while cap.isOpened():
                 pinky_tip = landmarks[20]  # Pinky finger tip landmark
 
                 # Calculate the distances between thumb and index finger, and thumb and middle finger
-                distance_thumb_index = math.sqrt((thumb_tip[0] - index_tip[0])**2 + (thumb_tip[0] - index_tip[0])**2)
-                distance_thumb_middle = math.sqrt((thumb_tip[0] - middle_tip[0])**2 + (thumb_tip[0] - middle_tip[0])**2)
-                distance_index_middle = math.sqrt((index_tip[0] - index_tip[0])**2 + (index_tip[0] - middle_tip[0])**2)
+                distance_thumb_index = int(math.sqrt((thumb_tip[0] - index_tip[0])**2 + (thumb_tip[1] - index_tip[1])**2))
+                distance_thumb_middle = int(math.sqrt((thumb_tip[0] - middle_tip[0])**2 + (thumb_tip[1] - middle_tip[1])**2))
+                distance_index_middle = int(math.sqrt((index_tip[0] - index_tip[0])**2 + (index_tip[1] - middle_tip[1])**2))
+
+                distance_thumb_wrist = int(math.sqrt((thumb_tip[0] - wrist_tip[0])**2 + (thumb_tip[1] - wrist_tip[1])**2))
+                distance_index_wrist = int(math.sqrt((index_tip[0] - wrist_tip[0])**2 + (index_tip[1] - wrist_tip[1])**2))
+                distance_middle_wrist = int(math.sqrt((middle_tip[0] - wrist_tip[0])**2 + (middle_tip[1] - wrist_tip[1])**2))
+                distance_ring_wrist = int(math.sqrt((ring_tip[0] - wrist_tip[0])**2 + (ring_tip[1] - wrist_tip[1])**2))
+                distance_pinky_wrist = int(math.sqrt((pinky_tip[0] - wrist_tip[0])**2 + (pinky_tip[1] - wrist_tip[1])**2))
 
                 # Check if the index and middle fingers are close together
-                if distance_index_middle < threshold:
                     # Check if the pinky and ring fingers are closed
-                    if abs(pinky_tip[1] - wrist_tip[1]) < (threshold + 50) and abs(ring_tip[1] - wrist_tip[1]) < (threshold + 50) and not (abs(middle_tip[1] - wrist_tip[1]) < (threshold + 50)):
-                        # Combine the distances for pinch zoom control
-                        pinch_distance = int((distance_thumb_index + distance_thumb_middle)/2)
-                        print(pinch_distance)
+                if  (distance_index_middle < 30) and (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist > threshold) and (distance_index_wrist > threshold) and (distance_thumb_wrist > threshold):
+                    # Combine the distances for pinch zoom control
+                    pinch_distance = int((distance_thumb_index + distance_thumb_middle)/2)
+                    print(pinch_distance) # map this to PWM vaule of enable pin
+
+                if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist > threshold):
+                    print('Right')
+                    bot_command("RT",pwm)
+
+                if (distance_pinky_wrist > threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist < threshold):
+                    print('Left')
+                    bot_command("LT", pwm)
+
+                if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist > threshold) and (distance_thumb_wrist < threshold):
+                    print('Stop')
+                    bot_command("STP", 0)
                 
-                # Calculate the distances between fingers
-                dist_thumb_index = thumb_tip[0] - index_tip[0]
-                dist_index_middle = index_tip[0] - middle_tip[0]
-                dist_middle_pinky = middle_tip[0] - pinky_tip[0]
+                if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist > threshold) and (distance_index_wrist > threshold) and (distance_thumb_wrist < threshold):
+                    print('Forward')
+                    bot_command("FWD", pwm)
                 
-                # Determine left or right hand based on finger distances
-                try:
-                    # Draw a green line from wrist to middle finger MCP
-                    wrist = landmarks[0]  # Wrist landmark
-                    middle_mcp = landmarks[9]  # Middle finger MCP landmark
-                    cv2.line(frame, wrist, middle_mcp, (0, 255, 0), 2)  # Green line
-                    
-                    # Calculate angle of rotation
-                    angle = math.atan2(wrist[1] - middle_mcp[1], wrist[0] - middle_mcp[0])
-                    angle = math.degrees(angle)
-                    angle -= 90  # Adjust for top of the screen as zero degrees
-                    if angle <= -180:
-                        angle += 360
-                    elif angle > 180:
-                        angle -= 360
-                    
-                    # Display rotation angle on the left side of the screen
-                    cv2.putText(frame, f"Rotation Angle: {angle:.2f}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
-                    
-                    # Check and print on screen based on angle condition
-                    if angle > 20:
-                        hand_label = "Right"
-                        turn=True
-                    elif angle < -20:
-                        hand_label = "Left"
-                        turn = True
-                    else:
-                        turn = False
-                        hand_label = ""
+                if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist > threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist < threshold):
+                    print('F#*k You Too')
+                    # Implement panic mode
 
-                except:
-                    pass
-                
-                # Display the label on the frame after flipping
-                cv2.putText(frame, hand_label, (landmarks[0][0], landmarks[0][1]), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
-
-            if hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x > hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x:
-                print("Right Hand Detected")
-
-    
-    
-
-
-    # Draw the boxes on the frame with red color and 2 pixels thickness
-    cv2.rectangle(frame, top_box_top_left, top_box_bottom_right, (0, 0, 255), 2)
-    cv2.rectangle(frame, bottom_box_top_left, bottom_box_bottom_right, (0, 0, 255), 2)
-    
     # Display the output
     cv2.imshow('Hand Tracking', frame)
     
-    # Press 'q' to exit the loop
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    # Check for key press events
+    key = cv2.waitKey(1) & 0xFF
 
+    if key == ord('q'):
+        break
+    elif key == ord('w'):  # Forward movement
+        if key == ord('a'):  # Forward left (aw)
+            pass
+            # bot_command('FLT')
+        elif key == ord('d'):  # Backward right (sd)
+            # bot_command('FRT')
+            pass
+        else:
+            bot_command('FWD', pwm)
+    elif key == ord('s'):  # Backward movement
+        if key == ord('a'):  # Backward left (as)
+            # bot_command('BLT')
+            pass
+        elif key == ord('d'):  # Backward right (sd)
+            # bot_command('BRT')
+            pass
+        else:
+            bot_command('BWD', pwm)
+    elif key == ord('a'):
+        bot_command('LT', pwm)
+    elif key == ord('d'):
+        bot_command('RT', pwm)
+    elif key == ord(' '):  # Stop movement if spacebar is pressed
+        bot_command('STP', 0)
 
 # Release resources
 cap.release()
