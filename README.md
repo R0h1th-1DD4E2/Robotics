@@ -31,16 +31,16 @@ The goal of this project is to create a robot that responds to hand gestures, al
 
 
 ## Usage
-1. Start the robot simulation in Coppeliasim.
-2. Run the `sim.py` script on your computer (acting as the client).
+1. Install the reqired libraries using the command `pip install -r requirements.txt`
+2. Run the `Handtracker.py` script on your computer (acting as the client).
 3. The robot will act as the server, receiving gesture commands from the client.
 4. The following gestures are assigned for robot movement:
-    - **0**: Halt
-    - **1**: Forward movement
-    - **2**: Left turn
-    - **3**: Right turn
-    - **4**: Move backward
-    - To reset the background for gesture detection, press the **'b'** key.
+    - Halt
+    - Forward movement
+    - Left turn
+    - Right turn
+    - Move backward
+    - To quit the program, press the **'q'** key.
 
 ## Future Improvements
 - Transition to the ESP32 for better performance and additional features.
