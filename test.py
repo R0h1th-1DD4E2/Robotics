@@ -7,8 +7,8 @@ import socket
 def bot_command(move: str, pwm: int) -> None:
     msg4robot = ','.join([move,f'{pwm},{pwm},0,0'])
     print(msg4robot)
-    bytesToSend         = str.encode(msg4robot)
-    bufferSize          = 1024
+    bytesToSend = str.encode(msg4robot)
+    bufferSize = 1024
     UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     UDPClientSocket.sendto(bytesToSend, robotAddressPort)
 
@@ -102,7 +102,8 @@ while cap.isOpened():
                     bot_command("FWD", pwm)
                 
                 if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist > threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist < threshold):
-                    print('F#*k You Too')
+                    pass
+                    # print('F#*k You Too')
                     # Implement panic mode
 
     # Display the output
