@@ -10,19 +10,19 @@ DataParser dataParser; // Create an instance of DataParse
 
 const int udpPort = 8080; // Change this to the desired UDP port
 
-int in1u = 5; // Up Left 
-int in2u = 4; 
-int enau = 2; 
-int in3u = 14; // Up Right 
-int in4u = 12; 
-int enbu = 13; 
+const int in1u = 5; // Up Left 
+const int in2u = 4; 
+const int enau = 2; 
+const int in3u = 14; // Up Right 
+const int in4u = 12; 
+const int enbu = 13; 
 
-// int in1d = 3; // Bottom Right
-// int in2d = 15; 
-// int enad = 1; 
-// int in3d = 10; // Bottom Left
-// int in4d = 11; 
-// int enbd = 9; 
+const int in1d = 3; // Bottom Right
+const int in2d = 15; 
+const int enad = 1; 
+const int in3d = 10; // Bottom Left
+const int in4d = 11; 
+const int enbd = 9; 
 
 int left_top_speed = 0;
 int left_bottom_speed = 0;
@@ -43,12 +43,12 @@ void setup() {
   pinMode(in4u, OUTPUT);
   pinMode(enbu, OUTPUT);
 
-  // pinMode(in1d, OUTPUT); 
-  // pinMode(in2d, OUTPUT); 
-  // pinMode(enad, OUTPUT);
-  // pinMode(in3d, OUTPUT);
-  // pinMode(in4d, OUTPUT);
-  // pinMode(enbd, OUTPUT);
+  pinMode(in1d, OUTPUT); 
+  pinMode(in2d, OUTPUT); 
+  pinMode(enad, OUTPUT);
+  pinMode(in3d, OUTPUT);
+  pinMode(in4d, OUTPUT);
+  pinMode(enbd, OUTPUT);
 
 
   WiFi.begin(ssid, password);
@@ -87,12 +87,11 @@ void loop() {
       // Extract the speed value
       left_top_speed = (dataParser.getField(1)).toInt();
       left_bottom_speed = (dataParser.getField(2)).toInt();
-      // right_top_speed = (dataParser.getField(3)).toInt();
-      // right_bottom_speed = (dataParser.getField(4)).toInt();
+      right_top_speed = (dataParser.getField(3)).toInt();
+      right_bottom_speed = (dataParser.getField(4)).toInt();
       
     }
   }
-
 
   move(Command,left_top_speed,left_bottom_speed,right_top_speed,right_bottom_speed);
 }
@@ -101,8 +100,8 @@ void move(String command, int left_top_speed, int left_bottom_speed, int right_t
   
   analogWrite(enau, left_top_speed);
   analogWrite(enbu, right_top_speed); 
-  // analogWrite(enbd, left_bottom_speed);
-  // analogWrite(enad, right_bottom_speed);
+  analogWrite(enbd, left_bottom_speed);
+  analogWrite(enad, right_bottom_speed);
   
   if (strcmp(command.c_str(), "FWD") == 0) {
     digitalWrite(in1u, HIGH); // Set the in1 pin to HIGH
@@ -110,10 +109,10 @@ void move(String command, int left_top_speed, int left_bottom_speed, int right_t
     digitalWrite(in3u, HIGH); // Set the in3 pin to HIGH
     digitalWrite(in4u, LOW); // Set the in4 pin to LOW
 
-    // digitalWrite(in1d, HIGH); // Set the in1 pin to HIGH
-    // digitalWrite(in2d, LOW); // Set the in2 pin to LOW
-    // digitalWrite(in3d, HIGH); // Set the in3 pin to HIGH
-    // digitalWrite(in4d, LOW); // Set the in4 pin to LOW
+    digitalWrite(in1d, HIGH); // Set the in1 pin to HIGH
+    digitalWrite(in2d, LOW); // Set the in2 pin to LOW
+    digitalWrite(in3d, HIGH); // Set the in3 pin to HIGH
+    digitalWrite(in4d, LOW); // Set the in4 pin to LOW
   }
 
   else if (strcmp(command.c_str(), "BWD") == 0) {
@@ -122,10 +121,10 @@ void move(String command, int left_top_speed, int left_bottom_speed, int right_t
     digitalWrite(in3u, LOW); // Set the in3 pin to LOW
     digitalWrite(in4u, HIGH); // Set the in4 pin to HIGH
 
-    // digitalWrite(in1d, LOW); // Set the in1 pin to LOW
-    // digitalWrite(in2d, HIGH); // Set the in2 pin to HIGH
-    // digitalWrite(in3d, LOW); // Set the in3 pin to LOW
-    // digitalWrite(in4d, HIGH); // Set the in4 pin to HIGH
+    digitalWrite(in1d, LOW); // Set the in1 pin to LOW
+    digitalWrite(in2d, HIGH); // Set the in2 pin to HIGH
+    digitalWrite(in3d, LOW); // Set the in3 pin to LOW
+    digitalWrite(in4d, HIGH); // Set the in4 pin to HIGH
   }
 
   else if (strcmp(command.c_str(), "RT") == 0) {
@@ -134,10 +133,10 @@ void move(String command, int left_top_speed, int left_bottom_speed, int right_t
     digitalWrite(in3u, HIGH); // Set the in3 pin to HIGH
     digitalWrite(in4u, LOW); // Set the in4 pin to LOW
 
-    // digitalWrite(in1d, HIGH); // Set the in1 pin to LOW
-    // digitalWrite(in2d, LOW); // Set the in2 pin to HIGH
-    // digitalWrite(in3d, LOW); // Set the in3 pin to HIGH
-    // digitalWrite(in4d, HIGH); // Set the in4 pin to LOW
+    digitalWrite(in1d, HIGH); // Set the in1 pin to LOW
+    digitalWrite(in2d, LOW); // Set the in2 pin to HIGH
+    digitalWrite(in3d, LOW); // Set the in3 pin to HIGH
+    digitalWrite(in4d, HIGH); // Set the in4 pin to LOW
   }
 
   else if (strcmp(command.c_str(), "LT") == 0) {
@@ -146,10 +145,10 @@ void move(String command, int left_top_speed, int left_bottom_speed, int right_t
     digitalWrite(in3u, LOW); // Set the in3 pin to LOW
     digitalWrite(in4u, HIGH); // Set the in4 pin to HIGH
 
-    // digitalWrite(in1d, LOW); // Set the in1 pin to HIGH
-    // digitalWrite(in2d, HIGH); // Set the in2 pin to LOW
-    // digitalWrite(in3d, HIGH); // Set the in3 pin to LOW
-    // digitalWrite(in4d, LOW); // Set the in4 pin to HIGH
+    digitalWrite(in1d, LOW); // Set the in1 pin to HIGH
+    digitalWrite(in2d, HIGH); // Set the in2 pin to LOW
+    digitalWrite(in3d, HIGH); // Set the in3 pin to LOW
+    digitalWrite(in4d, LOW); // Set the in4 pin to HIGH
   }
 
   else if (strcmp(command.c_str(), "STP") == 0) {
@@ -158,10 +157,10 @@ void move(String command, int left_top_speed, int left_bottom_speed, int right_t
     digitalWrite(in3u, LOW); // Set the in3 pin to LOW
     digitalWrite(in4u, LOW); // Set the in4 pin to LOW
 
-    // digitalWrite(in1d, LOW); // Set the in1 pin to LOW
-    // digitalWrite(in2d, LOW); // Set the in2 pin to LOW
-    // digitalWrite(in3d, LOW); // Set the in3 pin to LOW
-    // digitalWrite(in4d, LOW); // Set the in4 pin to LOW
+    digitalWrite(in1d, LOW); // Set the in1 pin to LOW
+    digitalWrite(in2d, LOW); // Set the in2 pin to LOW
+    digitalWrite(in3d, LOW); // Set the in3 pin to LOW
+    digitalWrite(in4d, LOW); // Set the in4 pin to LOW
   }
 
   else {
