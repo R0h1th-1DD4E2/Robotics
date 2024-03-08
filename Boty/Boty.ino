@@ -20,14 +20,15 @@ const int enbu = 13;
 const int in1d = 3; // Bottom Right
 const int in2d = 0; 
 // const int enad = 12; 
-const int in3d = 10; // Bottom Left
-const int in4d = 9; 
+const int in3d = 9; // Bottom Left
+const int in4d = 16; 
 // const int enbd = 13; 
 
+unsigned long lastCommandTime = 0;
+const unsigned long commandTimeout = 5000;
+
 int left_top_speed = 0;
-int left_bottom_speed = 0;
 int right_top_speed = 0;
-int right_bottom_speed = 0;
 
 String Command;
 
@@ -60,7 +61,7 @@ void setup() {
   
   Serial.println("Connected to WiFi");
 
-  udp.begin(udpPort); // Start listening on the UDP port
+  udp.begin(udpPort); // Start listeningww on the UDP port
 
   Serial.print("UDP Listening on IP: ");
   Serial.println(WiFi.localIP());
@@ -87,10 +88,15 @@ void loop() {
       // Extract the speed value
       left_top_speed = (dataParser.getField(1)).toInt();
       right_top_speed = (dataParser.getField(2)).toInt();
+
+      lastCommandTime = millis();
     }
   }
 
-  move(Command,left_top_speed,right_top_speed);
+  if (millis() - lastCommandTime >= commandTimeout)
+    move("STP", 0, 0); // Reset command to stop
+  else
+    move(Command, left_top_speed, right_top_speed);
 }
 
 void move(String command, int left_top_speed,int right_top_speed){
