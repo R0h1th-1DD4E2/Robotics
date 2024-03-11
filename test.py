@@ -13,6 +13,7 @@ def bot_command(move: str, pwm: int) -> None:
     UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     UDPClientSocket.sendto(bytesToSend, robotAddressPort)
 
+
 def pwm_map(pinch_distance: int) -> int:
     if pinch_distance < 50:
         return 50
@@ -121,32 +122,11 @@ while cap.isOpened():
                     # print('F#*k You Too')
                     # Implement panic mode
 
-    # # Display the output
-    # cv2.imshow('Hand Tracking', frame)
+    # Display the output
+    cv2.imshow('Hand Tracking', frame)
     
-    # # Check for key press events
-    # key = cv2.waitKey(1) & 0xFF
-
-    # if key == ord('q'):
-    #     break
-    # elif key == ord('w'):  # Forward movement
-    #     bot_command('FWD', pwm)
-    # elif key == ord('s'):  # Backward movement
-    #      bot_command('BWD', pwm)
-    # elif key == ord('a'):
-    #     bot_command('LT', pwm)
-    # elif key == ord('d'):
-    #     bot_command('RT', pwm)
-    # elif key == ord(' '):  # Stop movement if spacebar is pressed
-    #     bot_command('STP', 0)
-    # elif key == ord('w') and cv2.waitKey(0) & 0xFF == ord('d'):  # Diagonal forward right movement
-    #     bot_command('DFRT', pwm)
-    # elif key == ord('w') and cv2.waitKey(0) & 0xFF == ord('a'):  # Diagonal forward left movement
-    #     bot_command('DFLT', pwm)
-    # elif key == ord('s') and cv2.waitKey(0) & 0xFF == ord('d'):  # Diagonal backward right movement
-    #     bot_command('DWRT', pwm)
-    # elif key == ord('s') and cv2.waitKey(0) & 0xFF == ord('a'):  # Diagonal backward left movement
-    #     bot_command('DWLT', pwm)
+    # Check for key press events
+    cv2.waitKey(1)
                 
     if keyboard.is_pressed('q'):
         break
