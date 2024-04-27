@@ -2,6 +2,7 @@ import pickle
 import cv2
 import mediapipe as mp
 import numpy as np
+import time
 
 def mode(model_path='./mode_training/model.p', video_source=0):
     # Load the model
@@ -16,6 +17,12 @@ def mode(model_path='./mode_training/model.p', video_source=0):
     mp_drawing = mp.solutions.drawing_utils
     mp_drawing_styles = mp.solutions.drawing_styles
     hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.3)
+    predicted_character = None
+
+    # Variables for tracking stability
+    start_time = 0
+    stable_character = None
+    output = None
 
     # Labels dictionary
     labels_dict = {0: 'B', 1: 'C', 2: 'L', 3: 'S', 4: 'Y', 5: '1'}
@@ -88,8 +95,15 @@ def mode(model_path='./mode_training/model.p', video_source=0):
                         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 0), 4)
                         cv2.putText(frame, predicted_character, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 0, 0), 3,
                                     cv2.LINE_AA)
-                        print(predicted_character)
-                        
+                        # print(predicted_character)
+                        if predicted_character == stable_character:
+                            if start_time is None:
+                                start_time = time.time()
+                            elif time.time() - start_time >= 2:
+                                yield predicted_character
+                        else:
+                            start_time = None
+                            stable_character = predicted_character
 
         # Display the frame
         cv2.imshow('frame', frame)
@@ -98,11 +112,10 @@ def mode(model_path='./mode_training/model.p', video_source=0):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-
     # Release video capture and close all windows
     cap.release()
     cv2.destroyAllWindows()
-    return predicted_character
 
 # Call the function to start hand gesture detection
-mode()
+for output in mode():
+    print(output)
