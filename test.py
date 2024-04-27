@@ -31,7 +31,7 @@ mp_hands = mp.solutions.hands
 hands = mp_hands.Hands()
 
 # Initialize VideoCapture
-cap = cv2.VideoCapture(0)  # Change the parameter if you have multiple cameras
+cap = cv2.VideoCapture(0)  # Change the parameter for multiple cameras
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)  # Set width
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)  # Set height
 
@@ -84,11 +84,12 @@ while cap.isOpened():
             distance_ring_wrist = int(math.sqrt((ring_tip[0] - wrist_tip[0])**2 + (ring_tip[1] - wrist_tip[1])**2))
             distance_pinky_wrist = int(math.sqrt((pinky_tip[0] - wrist_tip[0])**2 + (pinky_tip[1] - wrist_tip[1])**2))
 
+            # Draw hand landmarks on the frame
+            mp_drawing = mp.solutions.drawing_utils
+            mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+
             # Left hand gestures
             if hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x < hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x:
-                # Draw hand landmarks on the frame
-                mp_drawing = mp.solutions.drawing_utils
-                mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
                 # Check if the index and middle fingers are close together and the pinky and ring fingers are closed
                 if  (distance_index_middle < 30) and (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist > threshold) and (distance_index_wrist > threshold) and (distance_thumb_wrist > threshold):
@@ -98,29 +99,47 @@ while cap.isOpened():
                     pwm = pwm_map(pinch_distance)
 
                 if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist > threshold):
-                    print('Right')
+                    # print('Right')
                     bot_command("RT",pwm)
 
                 if (distance_pinky_wrist > threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist < threshold):
-                    print('Left')
+                    # print('Left')
                     bot_command("LT", pwm)
 
                 if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist < threshold):
-                    print('Stop')
+                    # print('Stop')
                     bot_command("STP", 0)
 
                 if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist > threshold) and (distance_thumb_wrist < threshold):
-                    print('Backward')
+                    # print('Backward')
                     bot_command("BWD", pwm)
                 
                 if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist > threshold) and (distance_index_wrist > threshold) and (distance_thumb_wrist < threshold):
-                    print('Forward')
+                    # print('Forward')
                     bot_command("FWD", pwm)
                 
                 if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist > threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist < threshold):
                     pass
-                    # print('F#*k You Too')
-                    # Implement panic mode
+
+
+            # Right hand gestures
+            elif hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x > hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x:
+                # print("Right Hand")
+                if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist > threshold):
+                    # print('Right')
+                    bot_command("WDRT",pwm)
+
+                if (distance_pinky_wrist > threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist < threshold):
+                    # print('Left')
+                    bot_command("WDLT", pwm)
+
+                if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist > threshold) and (distance_thumb_wrist > threshold):
+                    # print('WFRT')
+                    bot_command("WFRT", 0)
+
+                if (distance_pinky_wrist > threshold) and (distance_ring_wrist > threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist < threshold):
+                    # print('WFLT')
+                    bot_command("WFLT", pwm)
 
     # Display the output
     cv2.imshow('Hand Tracking', frame)
