@@ -1,3 +1,5 @@
 opencv-python
 tflite
 mediapipe
+python-dotenv
+sockets
