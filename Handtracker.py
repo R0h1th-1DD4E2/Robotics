@@ -5,6 +5,10 @@ import socket
 import keyboard
 import connect_bot
 import popup_box
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 def bot_command(move: str, pwm: int) -> None:
     msg4robot = ','.join([move,f'{pwm},{pwm},{pwm},{pwm}'])
@@ -22,16 +26,27 @@ def pwm_map(pinch_distance: int) -> int:
     else:
         return pinch_distance
 
-bot_address = connect_bot.find_device_ip("bc:ff:4d:f8:02:f1")
+# Connecting to bot
+bot_mac = os.getenv("BOT_MAC")
+bot_address = connect_bot.find_device_ip(bot_mac)
+if bot_address is None:
+    print("Bot was not found. Exiting ....")
+    exit()
+
+# Address to communicate
 robotAddressPort = (bot_address, 8080)
+
+# Variables for hand tracking
 threshold = 250
 pwm = 100
+
 # Initialize MediaPipe Hands
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands()
 
 # A popup to the user 
 popup_box.popup()
+
 # Initialize VideoCapture
 cap = cv2.VideoCapture(0)  # Change the parameter for multiple cameras
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)  # Set width
@@ -40,7 +55,6 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)  # Set height
 # Set the desired window size
 cv2.namedWindow('Hand Tracking', cv2.WINDOW_NORMAL)  # Create a resizable window
 cv2.resizeWindow('Hand Tracking', 1280, 720)  # Set the window size to 1280x720
-
 
 while cap.isOpened():
     global turn
@@ -57,7 +71,7 @@ while cap.isOpened():
     # Process the image with MediaPipe Hands
     results = hands.process(image)
     
-    # If hands are detected, annotate the image and label them
+    # If hands are detected
     if results.multi_hand_landmarks:
         for hand_landmarks in results.multi_hand_landmarks:
 
@@ -75,7 +89,7 @@ while cap.isOpened():
             ring_tip = landmarks[16]    # Ring finger tip landmark
             pinky_tip = landmarks[20]  # Pinky finger tip landmark
 
-            # Calculate the distances between thumb and index finger, and thumb and middle finger
+            # Calculate the distances between fingers
             distance_thumb_index = int(math.sqrt((thumb_tip[0] - index_tip[0])**2 + (thumb_tip[1] - index_tip[1])**2))
             distance_thumb_middle = int(math.sqrt((thumb_tip[0] - middle_tip[0])**2 + (thumb_tip[1] - middle_tip[1])**2))
             distance_index_middle = int(math.sqrt((index_tip[0] - index_tip[0])**2 + (index_tip[1] - middle_tip[1])**2))

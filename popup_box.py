@@ -1,7 +1,7 @@
 import tkinter as tk
 
 def on_continue_click(window):
-    # Close the popup window
+    # Close
     window.destroy()
 
 def popup():
@@ -9,15 +9,15 @@ def popup():
     root = tk.Tk()
     root.title("Hand Tracking Reminder")
 
-    # Create the label with the message
-    message = "Please keep your hand 25 to 30 cm from the screen for better tracking."
+    # Message
+    message = "Please keep your hand 25 to 30 cm from the Camera for better tracking."
     label = tk.Label(root, text=message)
     label.pack(padx=20, pady=20)
 
-    # Create the continue button
+    # Continue button
     continue_button = tk.Button(root, text="Continue", command=lambda: on_continue_click(root))
     continue_button.pack(padx=20, pady=10)
 
-    # Run the window
+    # Run window
     root.mainloop()
 

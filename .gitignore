@@ -1,3 +1,4 @@
 *.jpg
 ./mode/data/
 __*
+.env
