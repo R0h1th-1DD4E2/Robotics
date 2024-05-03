@@ -39,6 +39,7 @@ robotAddressPort = (bot_address, 8080)
 # Variables for hand tracking
 threshold = 250
 pwm = 100
+Camera_index = 0
 
 # Initialize MediaPipe Hands
 mp_hands = mp.solutions.hands
@@ -48,7 +49,7 @@ hands = mp_hands.Hands()
 popup_box.popup()
 
 # Initialize VideoCapture
-cap = cv2.VideoCapture(0)  # Change the parameter for multiple cameras
+cap = cv2.VideoCapture(Camera_index) # Change the parameter for multiple cameras
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)  # Set width
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)  # Set height
 
