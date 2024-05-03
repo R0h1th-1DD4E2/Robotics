@@ -33,7 +33,7 @@ def get_connected_devices():
 def find_device_ip(mac_address_to_find):
     connected_devices = get_connected_devices()
 
-    for interface, devices in connected_devices.items():
+    for devices in connected_devices.items():
         for ip_address, mac_address in devices.items():
             if mac_address.replace("-", ":") == mac_address_to_find:
                 print(f"bot was fount on ip address {ip_address}")
