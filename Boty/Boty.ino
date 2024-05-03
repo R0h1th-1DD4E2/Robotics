@@ -3,8 +3,8 @@
 #include <Arduino.h> // Include the Arduino library to use the Arduino functions
 #include "DataParser.h" // Include the DataParser library to parse the CSV data
 
-const char* ssid = "81NE-S010404 4362"; // The name of the WiFi network
-const char* password = "9054Nw&0"; // The password of the WiFi network
+const char* ssid = "INFINITER"; // The name of the WiFi network
+const char* password = "12345678"; // The password of the WiFi network
 
 DataParser dataParser; // Create an instance of DataParse
 
