@@ -48,6 +48,7 @@ robotAddressPort = (bot_address, 8080)
 threshold = 250
 pwm = 100
 Camera_index = 0
+command = "STP"
 
 # Initialize MediaPipe Hands
 mp_hands = mp.solutions.hands
@@ -64,6 +65,13 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)  # Set height
 # Set the desired window size
 cv2.namedWindow('Hand Tracking', cv2.WINDOW_NORMAL)  # Create a resizable window
 cv2.resizeWindow('Hand Tracking', 1280, 720)  # Set the window size to 1280x720
+
+# Font and other display settings
+font = cv2.FONT_HERSHEY_SIMPLEX
+font_scale = 1 
+font_color = (0, 0, 0)
+thickness = 2
+position = (50, 50)
 
 while cap.isOpened():
     global turn
@@ -122,26 +130,27 @@ while cap.isOpened():
                     pinch_distance = int((distance_thumb_index + distance_thumb_middle)/2)
                     # print(pinch_distance) # map this to PWM vaule of enable pin
                     pwm = pwm_map(pinch_distance)
+                    command = "STP"
 
                 if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist > threshold):
                     # print('Right')
-                    bot_command("RT",pwm)
+                    command = "RT"
 
                 if (distance_pinky_wrist > threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist < threshold):
                     # print('Left')
-                    bot_command("LT", pwm)
+                    command = "LT"
 
                 if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist < threshold):
                     # print('Stop')
-                    bot_command("STP", 0)
+                    command = "STP"
 
                 if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist > threshold) and (distance_thumb_wrist < threshold):
                     # print('Backward')
-                    bot_command("BWD", pwm)
+                    command = "BWD"
                 
                 if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist > threshold) and (distance_index_wrist > threshold) and (distance_thumb_wrist < threshold):
                     # print('Forward')
-                    bot_command("FWD", pwm)
+                    command = "FWD"
                 
                 if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist > threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist < threshold):
                     pass
@@ -151,20 +160,26 @@ while cap.isOpened():
             elif hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x > hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x:
                 # print("Right Hand")
                 if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist > threshold):
-                    bot_command("DWRT",pwm)
+                    command = "DWRT"
 
                 if (distance_pinky_wrist > threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist < threshold):
-                    bot_command("DWLT", pwm)
+                    command = "DWLT"
 
                 if (distance_pinky_wrist < threshold) and (distance_ring_wrist < threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist > threshold) and (distance_thumb_wrist > threshold):
-                    bot_command("DFRT", 0)
+                    command = "DFRT"
 
                 if (distance_pinky_wrist > threshold) and (distance_ring_wrist > threshold) and (distance_middle_wrist < threshold) and (distance_index_wrist < threshold) and (distance_thumb_wrist < threshold):
-                    bot_command("DFLT", pwm)
+                    command = "DFLT"
+
+            bot_command(command,pwm)
+
+    # Display Text
+    cv2.putText(frame, f"Current Command:{command}", position, font, font_scale, font_color, thickness)
+    cv2.putText(frame, f"Current PWM: {pwm}", (position[0], position[1] + 30), font, font_scale, font_color, thickness)
 
     # Display the output
     cv2.imshow('Hand Tracking', frame)
-    
+
     # Check for key press events
     cv2.waitKey(1)
                 
