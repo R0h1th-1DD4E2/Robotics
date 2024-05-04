@@ -7,6 +7,7 @@ import connect_bot
 import popup_box
 from dotenv import load_dotenv
 import os
+import sys
 
 load_dotenv()
 
@@ -28,10 +29,17 @@ def pwm_map(pinch_distance: int) -> int:
 
 # Connecting to bot
 bot_mac = os.getenv("BOT_MAC")
-bot_address = connect_bot.find_device_ip(bot_mac)
-if bot_address is None:
-    print("Bot was not found. Exiting ....")
-    exit()
+bot_address = None
+
+# If Arguments given
+if len(sys.argv) > 1:
+    bot_address = sys.argv[1]
+else:
+    # IF bot is connected to the laptops Hotspot, Automatic Search
+    bot_address = connect_bot.find_device_ip(bot_mac)
+    if bot_address is None:
+        print("Bot was not found. Exiting ....")
+        exit()
 
 # Address to communicate
 robotAddressPort = (bot_address, 8080)
