@@ -154,3 +154,7 @@ class HandTrackingController:
         # Release resources
         self.cap.release()
         cv2.destroyAllWindows()
+
+        
+    def stop_gesture_tracking(self):
+        self.running = False
